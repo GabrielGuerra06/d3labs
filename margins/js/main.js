@@ -1,11 +1,11 @@
 var margin = {top: 10, right: 10, bottom: 100, left:100};
 var width = 600 - margin.left - margin.right;
 var height = 400 - margin.top - margin.bottom;
-d3.json("data/revenues.json").then((data)=> {
+d3.json("data/buildings.json").then((data)=> {
 
 	data.forEach((d)=>{
 
-		d.revenue = +d.revenue;
+		d.height = +d.height;
 	});
 
 	console.log(data);
@@ -18,7 +18,7 @@ d3.json("data/revenues.json").then((data)=> {
 	.attr("transform", "translate(" + margin.left + ", " + margin.top + ")");
 	
 	var x = d3.scaleBand()
-	.domain(data.map((d)=>{return d.month;}))
+	.domain(data.map((d)=>{return d.name;}))
 	.range([0, width])
 	.paddingInner(0.3)
 	.paddingOuter(0.3);
@@ -27,15 +27,17 @@ d3.json("data/revenues.json").then((data)=> {
 	.domain([0,828])
 	.range([height,0]);
 
-
+	var color = d3.scaleOrdinal()
+	.domain(data.map((d) => { return d.name; }))
+	.range(d3.schemeSet3);
 
 	var rects = g.selectAll("rect").data(data);
 
 	rects.enter().append("rect")
-	.attr("x", (d)=>{ return x(d.month); })
-	.attr("y", (d) => { return y(d.revenue); })
+	.attr("x", (d)=>{ return x(d.name); })
+	.attr("y", (d) => { return y(d.height); })
 	.attr("width", x.bandwidth())
-	.attr("height", (d)=>{ return height - y(d.revenue); })
+	.attr("height", (d)=>{ return height - y(d.height); })
 
 	var bottomAxis = d3.axisBottom(x);
 	g.append("g")
