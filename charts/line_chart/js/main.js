@@ -3,7 +3,7 @@
 */
 
 var margin = { left:80, right:100, top:50, bottom:100 },
-    height = 500 - margin.top - margin.bottom, 
+    height = 700 - margin.top - margin.bottom, 
     width = 800 - margin.left - margin.right;
 
 var svg = d3.select("#chart-area").append("svg")
@@ -21,7 +21,7 @@ var bisectDate = d3.bisector((d) => { return d.year; }).left;
 
 // Scales
 var x = d3.scaleTime().range([0, width]);
-var y = d3.scaleLinear().range([height, 0]);
+var y = d3.scaleLinear().range([height , 0]);
 
 // Axis generators
 var xAxisCall = d3.axisBottom()
@@ -49,6 +49,11 @@ yAxis.append("text")
 // Line path generator
 // TODO: Implement the line generator
 
+var line = d3.line()
+.x((d) => { return x(d.year); })
+.y((d) => { return y(d.value); });
+
+
 d3.json("data/example.json").then((data) => {
     // Data cleaning
     data.forEach((d) => {
@@ -56,16 +61,28 @@ d3.json("data/example.json").then((data) => {
         d.value = +d.value;
     });
 
+
+    console.log(data);
+
     // Set scale domains
     // TODO: set domain of axes
-
-    // Generate axes once scales have been set
+    x.domain(d3.extent(data, (d) =>   d.year ));
+    y.domain(d3.extent(data, (d) => d.value));
+    
     xAxis.call(xAxisCall.scale(x))
     yAxis.call(yAxisCall.scale(y))
 
     // Add line to chart
     // TODO: add line path
+    g.append("path")
+        .datum(data)
+        .attr("class", "line")
+        .attr("fill", "none")
+        .attr("stroke", "steelblue")
+        .attr("stroke-width", "2px")
+        .attr("d", line);
 
+        console.log("Path data:", line(data));
     /******************************** Tooltip Code ********************************/
 
     var focus = g.append("g")

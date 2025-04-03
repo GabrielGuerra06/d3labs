@@ -34,6 +34,10 @@ var yAxisCall = d3.axisLeft().tickFormat(formatBillion);
 // The x coordinate will be the date of the data
 // while y0 and y1 will be in the 0 and 1 positions of the d element
 // TODO: create the stack
+var area = d3.area()
+    .x((d) => x(d.data.date)) 
+    .y0((d) => y(d[0])) 
+    .y1((d) => y(d[1])); 
 
 // Axis groups
 var xAxis = g.append("g")
@@ -58,16 +62,19 @@ var legend = g.append("g")
         "," + (height - 210) + ")");
 
 d3.csv('data/stacked_area2.csv').then((data) => {
-
     color.domain(d3.keys(data[0]).filter((key) => { 
         return key !== 'date'; 
     }));
         
     //TODO: obtain the keys array, remember to remove the first column
-    var keys = [];
+    var keys = d3.keys(data[0]).filter((key) => key !== 'date');
+    color.domain(keys);
 
 	data.forEach((d) => {
 	    d.date = parseDate(d.date);
+        keys.forEach((key) => {
+            d[key] = +d[key];
+        });
 	}); 
 
     var maxDateVal = d3.max(data, (d) => {
@@ -87,14 +94,41 @@ d3.csv('data/stacked_area2.csv').then((data) => {
     // Add stacked area chart
     // TODO: finish the configuration of the stack object
     // by setting the keys, order and offset
+    var stack = d3.stack()
+        .keys(keys) 
+        .order(d3.stackOrderNone) 
+        .offset(d3.stackOffsetNone); 
 
     // TODO: bind the data to the stack and create the group 
     // that will contain the area path
+    var stackedData = stack(data);
 
     // TODO: call the area generator with the appropriate data
-
+    g.selectAll(".layer")
+        .data(stackedData)
+        .enter().append("path")
+        .attr("class", "layer")
+        .attr("fill", (d) => color(d.key))
+        .attr("d", area);
     // Create legend
     // TODO: Create a legend showing all the names of every color
+    var legendRow = legend.selectAll(".legend-row")
+    .data(keys)
+    .enter().append("g")
+    .attr("class", "legend-row")
+    .attr("transform", (d, i) => "translate(0," + (i * 20) + ")");
+
+legendRow.append("rect")
+    .attr("width", 10)
+    .attr("height", 10)
+    .attr("fill", (d) => color(d));
+
+legendRow.append("text")
+    .attr("x", 20)
+    .attr("y", 10)
+    .attr("text-anchor", "start")
+    .style("text-transform", "capitalize")
+    .text((d) => d);
 
 }).catch((error) => {
     console.log(error);

@@ -21,19 +21,31 @@ var color = d3.scaleOrdinal(d3.schemeCategory10);
 
 // TODO: create the arc generator for a donut chart.
 // var arc = ...
+var arc = d3.arc()
+    .innerRadius(radius - 100) 
+    .outerRadius(radius); 
 
 // TODO: create the pie layout generator.
 // var pie = ...
+var pie = d3.pie()
+    .sort(null) 
+    .value((d) => d.count); 
 
 d3.tsv("data/donut2.tsv").then((data) => {
     // TODO: Transform data to its proper format
     // count -> number
     // fruit -> lower case
-
+   data.forEach((d) => {
+        d.count = +d.count;
+        d.fruit = d.fruit.toLowerCase(); 
+    });
     console.log(data);
     
     // TODO: create the nest function to group by fruits
-    var regionsByFruit = null;
+    var regionsByFruit = d3.nest()
+    .key((d) => d.fruit) 
+    .entries(data);
+
 
     console.log(regionsByFruit)
 
